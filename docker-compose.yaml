@@ -1,0 +1,40 @@
+
+version: '3.8'
+services:
+  # Redis
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+
+  # MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS}
+      AUTH: admin
+    ports:
+      - '27017:27017'
+    volumes:
+      - 'my_mongodb_data:/data/db'
+
+  # Mongo Express
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${DB_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${DB_PASS}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    ports:
+      - '8081:8081'
+    depends_on:
+      - mongodb
+
+volumes:
+  my_mongodb_data:
+    driver: local

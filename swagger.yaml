@@ -1,0 +1,1075 @@
+openapi: 3.0.3
+info:
+  title: Music mania
+  version: 0.1.0
+  description: |-
+    This is a sample music streaming Server based on the OpenAPI 3.0 specification.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: demo@gamil.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+ 
+  
+  
+  
+servers:
+  - url: http://localhost:5000/api/v1
+tags:
+  - name: Songs
+    description: Everything about songs
+  - name: User
+    description: Operations about user
+paths:
+  /songs:
+    get:
+      summary: Get a list of songs
+      tags: 
+       - Songs
+      description: Retrieve a list of songs based on query parameters.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: The current page number.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: The number of songs to return per page.
+        - in: query
+          name: sortType
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: The type of sorting (asc or desc).
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            enum: [updatedAt, title]
+            default: updatedAt
+          description: The property used for sorting (updatedAt or title).
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: The search term to filter songs by title.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  song_data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 5f5b91a35f7b9a7e6a18f592
+                        title:
+                          type: string
+                        cover:
+                          type: string
+                        timestamp:
+                          type: string
+                        links:
+                          type: object
+                          properties:
+                            self:
+                              type: string
+                            nextPage:
+                              type: string
+                            prevPage:
+                              type: string
+                  pagination:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      nextPage:
+                        type: integer
+                      prevPage:
+                        type: integer
+                      totalPage:
+                        type: integer
+                      totalArticle:
+                        type: integer
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      nextPage:
+                        type: string
+                      prevPage:
+                        type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    post:
+      summary: Upload new song
+      description: Upload a new song to the system.
+      tags:
+        - Songs
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: The title of the song.
+                  example: "My Song"
+                artist:
+                  type: string
+                  description: The artist of the song.
+                  example: "John Doe"
+                cover:
+                  type: string
+                  description: URL to the song's cover image (optional).
+                  example: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0aU7JI6Bri7Q7EAfaagViM0_Lb6oANAgCADBZ3KQ&s'
+                status:
+                  type: string
+                  description: The status of the song .
+                  enum: [draft, published]
+                  default: "published"
+                  example: "published"
+                category:
+                  type: string
+                  enum: [Free Tier, Premium Tier]
+                  default: "Free Tier"
+              required:
+                - title
+                - artist
+                - category
+            encoding:
+              mp3:
+                contentType: audio/mpeg
+      responses:
+        '201':
+          description: Song uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Song uploaded successfully."
+                  song_data:
+                    type: object
+                    description: Information about the uploaded song.
+                    properties:
+                      id:
+                        type: string
+                        description: The unique ID of the song.
+                        example: "5f5b91a35f7b9a7e6a18f592"
+                      title:
+                        type: string
+                        description: The title of the song.
+                        example: "My Song"
+                      artist:
+                        type: string
+                        description: The artist of the song.
+                        example: "John Doe"
+                      cover:
+                        type: string
+                        description: URL to the song's cover image (if provided).
+                      status:
+                        type: string
+                        description: The status of the song.
+                      category:
+                        type: string
+                        example: free tier
+                        description: The category of the song.
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        description: URL to the newly uploaded song.
+                      author:
+                        type: string
+                        description: URL to the artist's profile.
+                      comments:
+                        type: string
+                        description: URL to comments section for the song.
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid input."
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          description: The field that caused the error.
+                          example: "title"
+                        message:
+                          type: string
+                          description: The error message.
+                          example: "Title is required."
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized access."
+  /songs/{id}:
+    get:
+      summary: Get a single song
+      description: Retrieve a single song by its ID.
+      tags:
+        - Songs
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the song to retrieve.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  song_data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: The unique ID of the song.
+                        example: "5f5b91a35f7b9a7e6a18f592"
+                      title:
+                        type: string
+                        description: The title of the song.
+                        example: "My Song"
+                      cover:
+                        type: string
+                        description: URL to the song's cover image (if available).
+                        example: "https://example.com/song-cover.jpg"
+                      timestamp:
+                        type: string
+                        description: Timestamp of when the song was created.
+                        example: "2023-09-25T12:34:56Z"
+                      links:
+                        type: object
+                        properties:
+                          self:
+                            type: string
+                            description: URL to the requested song.
+                            example: "https://example.com/api/songs/5f5b91a35f7b9a7e6a18f592"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        description: URL to the current endpoint.
+                        example: "https://example.com/api/songs/5f5b91a35f7b9a7e6a18f592"
+        '404':
+          description: Song not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Song not found."      
+    put:
+      summary: Update a song
+      description: Update the details of a song by its ID.
+      tags:
+        - Songs
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the song to update.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: The updated title of the song (optional).
+                  example: "Updated Song Title"
+                artist:
+                  type: string
+                  description: The updated artist of the song (optional).
+                  example: "Updated Artist Name"
+                cover:
+                  type: string
+                  description: URL to the updated cover image (optional).
+                  example: "https://example.com/updated-song-cover.jpg"
+                status:
+                  type: string
+                  enum: ["published", "draft"]
+                  description: The updated status of the song (optional).
+                  default: "published"
+                category:
+                  type: string
+                  enum: ["Free Tier", "Premium Tier."]
+                  default: "Free Tier"
+                  description: The updated category of the song (optional).
+                  
+              required:
+                - title
+                - artist
+                - category
+            encoding:
+              mp3:
+                contentType: audio/mpeg
+      responses:
+        '200':
+          description: Successful update
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Song updated successfully."
+                  song_data:
+                    type: object
+                    description: Information about the updated song.
+                    properties:
+                      id:
+                        type: string
+                        description: The unique ID of the updated song.
+                        example: "5f5b91a35f7b9a7e6a18f592"
+                      title:
+                        type: string
+                        description: The updated title of the song.
+                        example: "Updated Song Title"
+                      artist:
+                        type: string
+                        description: The updated artist of the song.
+                        example: "Updated Artist Name"
+                      cover:
+                        type: string
+                        description: URL to the updated cover image (if available).
+                        example: "https://example.com/updated-song-cover.jpg"
+                      timestamp:
+                        type: string
+                        description: Timestamp of when the song was updated.
+                        example: "2023-09-25T14:45:00Z"
+                      links:
+                        type: object
+                        properties:
+                          self:
+                            type: string
+                            description: URL to the updated song.
+                            example: "https://example.com/api/songs/5f5b91a35f7b9a7e6a18f592"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        description: URL to the current endpoint.
+                        example: "https://example.com/api/songs/5f5b91a35f7b9a7e6a18f592"
+        '201':
+          description: Successful creation if the song doesn't exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Song created successfully."
+                  song_data:
+                    type: object
+                    description: Information about the created song.
+                    properties:
+                      id:
+                        type: string
+                        description: The unique ID of the created song.
+                        example: "5f5b91a35f7b9a7e6a18f592"
+                      title:
+                        type: string
+                        description: The title of the song.
+                        example: "Updated Song Title"
+                      artist:
+                        type: string
+                        description: The artist of the song.
+                        example: "Updated Artist Name"
+                      cover:
+                        type: string
+                        description: URL to the cover image (if available).
+                        example: "https://example.com/updated-song-cover.jpg"
+                      timestamp:
+                        type: string
+                        description: Timestamp of when the song was created.
+                        example: "2023-09-25T14:45:00Z"
+                      links:
+                        type: object
+                        properties:
+                          self:
+                            type: string
+                            description: URL to the created song.
+                            example: "https://example.com/api/songs/5f5b91a35f7b9a7e6a18f592"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        description: URL to the current endpoint.
+                        example: "https://example.com/api/songs/5f5b91a35f7b9a7e6a18f592"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid input."
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          description: The field that caused the error.
+                          example: "title"
+                        message:
+                          type: string
+                          description: The error message.
+                          example: "Title is required."
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized access."
+    delete:
+      summary: Delete a song
+      description: Delete a song by its ID.
+      tags:
+        - Songs
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the song to delete.
+      responses:
+        '204':
+          description: Successful deletion
+        '404':
+          description: Song not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Song not found."
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized access."
+                    
+  /users:
+    get:
+      summary: Get users (Admin)
+      description: Retrieve a list of users based on query parameters. This endpoint is accessible to Admins only.
+      tags:
+        - Users
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: The current page number.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: The number of objects to be returned.
+        - in: query
+          name: sortType
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: The type of sort (asc or desc).
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            enum: [updatedAt, title]
+            default: updatedAt
+          description: The property used for sorting.
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: The name of the user.
+        - in: query
+          name: email
+          schema:
+            type: string
+          description: The email of the user.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: The unique ID of the user.
+                        name:
+                          type: string
+                          description: The name of the user.
+                        email:
+                          type: string
+                          description: The email of the user.
+                        timestamp:
+                          type: string
+                          description: Timestamp of user data.
+                  pagination:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                        description: Current page number.
+                      limit:
+                        type: integer
+                        description: Number of objects per page.
+                      nextPage:
+                        type: integer
+                        description: Next page number.
+                      prevPage:
+                        type: integer
+                        description: Previous page number.
+                      totalPage:
+                        type: integer
+                        description: Total number of pages.
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        description: URL to the current endpoint.
+                      nextPage:
+                        type: string
+                        description: URL to the next page of results.
+                      prevPage:
+                        type: string
+                        description: URL to the previous page of results.
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+      security:
+        - bearerAuth: []  # Assuming bearer token authentication for Admins
+    post:
+      summary: Create a user (Admin)
+      description: Create a new user. This endpoint is accessible to Admins only.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the user.
+                  example: "John Doe"
+                email:
+                  type: string
+                  description: The email of the user.
+                  example: "john.doe@example.com"
+                password:
+                  type: string
+                  description: The password of the user.
+                  example: "secretpassword"
+                role:
+                  type: string
+                  description: The role of the user.
+                  example: "Admin"
+                status:
+                  type: string
+                  description: The status of the user.
+                  example: "Active"
+      responses:
+        '201':
+          description: Successful creation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User created successfully."
+                  user_data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: The unique ID of the created user.
+                        example: "12345"
+                      name:
+                        type: string
+                        description: The name of the user.
+                        example: "John Doe"
+                      email:
+                        type: string
+                        description: The email of the user.
+                        example: "john.doe@example.com"
+                      role:
+                        type: string
+                        description: The role of the user.
+                        example: "Admin"
+                      status:
+                        type: string
+                        description: The status of the user.
+                        example: "Active"
+                      timestamp:
+                        type: string
+                        description: Timestamp of user data.
+                        example: "2023-09-25T14:45:00Z"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        description: URL to the created user's profile.
+                        example: "https://example.com/api/users/12345"
+                      edit:
+                        type: string
+                        description: URL to edit the user's profile.
+                        example: "https://example.com/api/users/12345/edit"
+                      delete:
+                        type: string
+                        description: URL to delete the user's profile.
+                        example: "https://example.com/api/users/12345/delete"
+                      view:
+                        type: string
+                        description: URL to view the user's profile.
+                        example: "https://example.com/api/users/12345/view"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          description: The field that caused the error.
+                        message:
+                          type: string
+                          description: The error message.
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized access."
+      
+  /users/{id}:
+    get:
+      summary: Get a single user (Admin)
+      description: Retrieve a single user by their ID. This endpoint is accessible to Admins only.
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to retrieve.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: The unique ID of the user.
+                        example: "12345"
+                      name:
+                        type: string
+                        description: The name of the user.
+                        example: "John Doe"
+                      email:
+                        type: string
+                        description: The email of the user.
+                        example: "john.doe@example.com"
+                      timestamp:
+                        type: string
+                        description: Timestamp of user data.
+                        example: "2023-09-25T14:45:00Z"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        description: URL to the current endpoint.
+                        example: "https://example.com/api/users/12345"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found."
+      security:
+        - bearerAuth: []  # Assuming bearer token authentication for Admins       
+    patch:
+      summary: Update a user 
+      description: Update user information. This endpoint is accessible to Admins only.
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The updated name of the user.
+                  example: "Updated Name"
+                email:
+                  type: string
+                  description: The updated email of the user.
+                  example: "updated.email@example.com"
+                role:
+                  type: string
+                  description: The updated role of the user.
+                  example: "Admin"
+                status:
+                  type: string
+                  description: The updated status of the user (only admin can update).
+                  example: "Inactive"
+      responses:
+        '200':
+          description: Successful update
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User updated successfully."
+                  user_data:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: The updated name of the user.
+                        example: "Updated Name"
+                      email:
+                        type: string
+                        description: The updated email of the user.
+                        example: "updated.email@example.com"
+                      role:
+                        type: string
+                        description: The updated role of the user.
+                        example: "Admin"
+                      status:
+                        type: string
+                        description: The updated status of the user.
+                        example: "Inactive"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        description: URL to the updated user's profile.
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found."
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          description: The field that caused the error.
+                        message:
+                          type: string
+                          description: The error message.
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized access."
+      security:
+        - bearerAuth: [] 
+    delete:
+      summary: Delete a user (Admin)
+      description: Delete a user by their ID. This endpoint is accessible to Admins only.
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the user to delete.
+      responses:
+        '204':
+          description: Successful deletion
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found."
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized access."
+      security:
+        - bearerAuth: []  
+  /users/{id}/password:
+    patch:
+      summary: Change password 
+      description: Change the password for a user by their ID.
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the user whose password should be changed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: The new password for the user.
+                  example: "newsecretpassword"
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password changed successfully."
+                  links:
+                    type: object
+                    properties:
+                      view:
+                        type: string
+                        description: URL to view the user's profile.
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found."
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message.
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          description: The field that caused the error.
+                        message:
+                          type: string
+                          description: The error message.
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Unauthorized access."
+      security:
+        - bearerAuth: [] 
+                    
+                    
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

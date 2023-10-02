@@ -4,7 +4,9 @@ require("dotenv").config();
 const app = express();
 const routes = require("./routes");
 applyMiddleware(app);
+app.use(express.static('public'));
 app.use(routes.userRouter);
+app.use(routes.songRouter);
 app.get("/health", (req, res) => {
   res.send("Hello World!");
 });

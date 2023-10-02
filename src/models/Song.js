@@ -16,7 +16,7 @@ const songSchema = new mongoose.Schema(
     Category: {
       type: String,
       enum: ["free tier", "premium tier"],
-      default: "ree tier",
+      default: "free tier",
     },
     status: {
       type: String,

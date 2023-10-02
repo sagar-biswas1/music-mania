@@ -138,8 +138,8 @@ paths:
       description: Upload a new song to the system.
       tags:
         - Songs
-      security:
-        - bearerAuth: []
+      # security:
+      #   - bearerAuth: []
       requestBody:
         required: true
         content:

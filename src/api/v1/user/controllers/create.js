@@ -1,10 +1,10 @@
 const userService = require("../../../../lib/user");
 
 const create = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password,status,role } = req.body;
 
   try {
-    const user = await userService.create({ name, email, password });
+    const user = await userService.create({ name, email, password,role,status });
 
     const response = {
       code: 201,

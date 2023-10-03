@@ -142,4 +142,6 @@ dist
 .svelte-kit
 
 .uploads/
+
+.uploads/hls_output
 # End of https://www.toptal.com/developers/gitignore/api/node

@@ -16,6 +16,7 @@ const storage = multer.diskStorage({
 
 router
 .route("/api/v1/songs")
+.get(songsControllers.findAll)
 .post(upload.single('musicFile'),songsControllers.upload)
 
 

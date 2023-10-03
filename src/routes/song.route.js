@@ -20,5 +20,8 @@ router
 .post(upload.single('musicFile'),songsControllers.upload)
 
 
+router
+.route("/api/v1/songs/:id")
+.get(songsControllers.findByID)
 
 module.exports = {songRouter:router}

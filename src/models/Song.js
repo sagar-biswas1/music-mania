@@ -3,17 +3,36 @@ const mongoose = require("mongoose");
 // Define the schema
 const songSchema = new mongoose.Schema(
   {
-    Title: {
+    title: {
       type: String,
       required: true,
       trim: true, // Removes leading/trailing whitespace
     },
-    Artist: {
+    artist: {
       type: String,
       required: true,
       trim: true,
     },
-    Category: {
+    fileName:{
+      type: String,
+      required: true,
+      trim: true,
+    },
+    originalName:{
+      type: String,
+      required: true,
+      trim: true,
+    },
+    audioLink:{
+      type: String,
+      required: true,
+      trim: true,
+    },
+    durationInSeconds:{
+      type: Number,
+      required: true,
+    },
+    category: {
       type: String,
       enum: ["free tier", "premium tier"],
       default: "free tier",
@@ -28,14 +47,11 @@ const songSchema = new mongoose.Schema(
       ref: "User", // Reference to the User model (many-to-one relationship)
       required: true,
     },
-    timestamp: {
-      type: Date,
-      default: Date.now,
-    },
-    path: {
+   
+    
+    processedPath:{
       type: String,
-      required: true,
-    },
+    }
   },
   {
     timestamps: true,

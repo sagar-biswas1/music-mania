@@ -8,7 +8,7 @@
     "audio-processor": "node ./src/queue.js",
     "dev": "nodemon ./src/index.js",
     "web-server": "nodemon ./src/index.js",
-    "audio-server": "node ./src/audio-server.js",
+    "audio-server": "nodemon ./src/audio-server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "concurrently \"npm run web-server\" \"npm run audio-processor\" \"npm run audio-server\""
   },

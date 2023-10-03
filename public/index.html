@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HLS Audio Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+    <h1>HLS Audio Player</h1>
+    
+    <!-- HLS audio player -->
+    <audio controls id="audio"></audio>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const hls = new Hls(); // Initialize hls.js
+
+        if (Hls.isSupported()) {
+            console.log('HLS is supported')
+          hls.loadSource('http://localhost:4001/musicFile-1696281387631-77210311.m3u8'); // Replace with your HLS stream URL
+          hls.attachMedia(audio);
+        }
+    </script>
+</body>
+</html>
